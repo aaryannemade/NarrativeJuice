@@ -49,6 +49,7 @@ SourceArt/**/*.tga
 Binaries/*
 Plugins/*/Binaries/*
 Plugins/*/*/Binaries/*
+Plugins/Developer/RiderLink/Binaries/*
 
 # Builds
 Build/*
@@ -71,6 +72,7 @@ Saved/*
 Intermediate/*
 Plugins/*/Intermediate/*
 Plugins/*/*/Intermediate/*
+*/Plugins/Developer/RiderLink/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
