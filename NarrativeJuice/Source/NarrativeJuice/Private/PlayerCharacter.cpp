@@ -85,12 +85,12 @@ void APlayerCharacter::MoveRight(float value)
 
 void APlayerCharacter::MousePitch(float value)
 {
-	AddControllerPitchInput(value);
+	AddControllerPitchInput(value * MouseSensitivity);
 }
 
 void APlayerCharacter::MouseYaw(float value)
 {
-	AddControllerYawInput(value);
+	AddControllerYawInput(value * MouseSensitivity);
 }
 
 void APlayerCharacter::GamepadPitch(float value)

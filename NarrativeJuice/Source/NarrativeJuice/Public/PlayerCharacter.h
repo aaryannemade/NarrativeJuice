@@ -32,6 +32,9 @@ public:
 	float MoveY = 0.f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float MouseSensitivity = 1.f;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float ControllerSensitivity = 45.f;
 
 	void MoveForward(float value);
