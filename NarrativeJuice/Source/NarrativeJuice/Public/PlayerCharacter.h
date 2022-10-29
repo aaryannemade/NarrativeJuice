@@ -31,9 +31,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float MoveY = 0.f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float ControllerSensitivity = 45.f;
+
 	void MoveForward(float value);
 
 	void MoveRight(float value);
+
+	void MousePitch(float value);
+	void MouseYaw(float value);
+	void GamepadPitch(float value);
+	void GamepadYaw(float value);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool MovementInput = false;

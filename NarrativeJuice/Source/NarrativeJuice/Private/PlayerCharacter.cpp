@@ -52,6 +52,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
+	PlayerInputComponent->BindAxis("MousePitch", this, &APlayerCharacter::MousePitch);
+	PlayerInputComponent->BindAxis("MouseYaw", this, &APlayerCharacter::MouseYaw);
+	PlayerInputComponent->BindAxis("GamepadPitch", this, &APlayerCharacter::GamepadPitch);
+	PlayerInputComponent->BindAxis("GamepadYaw", this, &APlayerCharacter::GamepadYaw);
+
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -76,6 +81,26 @@ void APlayerCharacter::MoveRight(float value)
 	//Add right/left movement to character
 	const FVector Direction = FRotationMatrix(GetControlRotationYaw()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(Direction, MoveY);
+}
+
+void APlayerCharacter::MousePitch(float value)
+{
+	AddControllerPitchInput(value);
+}
+
+void APlayerCharacter::MouseYaw(float value)
+{
+	AddControllerYawInput(value);
+}
+
+void APlayerCharacter::GamepadPitch(float value)
+{
+	AddControllerPitchInput(value * DeltaX * ControllerSensitivity);
+}
+
+void APlayerCharacter::GamepadYaw(float value)
+{
+	AddControllerYawInput(value * DeltaX * ControllerSensitivity);
 }
 
 FRotator APlayerCharacter::GetControlRotationYaw()
