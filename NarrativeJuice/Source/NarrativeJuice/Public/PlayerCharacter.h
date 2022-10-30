@@ -38,6 +38,9 @@ struct FMovementSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AutoRunTime = 1.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DodgeForce = 1560.f;
 };
 
 UCLASS()
@@ -72,6 +75,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float AnimationTargetRotationLastFrame = 0.f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool IsDodging = false;
+
+	float DodgeTimer = 0.f;
+
 	void MoveForward(float value);
 
 	void MoveRight(float value);
@@ -80,6 +88,8 @@ public:
 	void MouseYaw(float value);
 	void GamepadPitch(float value);
 	void GamepadYaw(float value);
+
+	void Dodge();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool MovementInput = false;
@@ -148,6 +158,8 @@ public:
 	void SetLeanDirection();
 
 	void AutoRun();
+
+	void DodgeRoll();
 	
 protected:
 	// Called when the game starts or when spawned

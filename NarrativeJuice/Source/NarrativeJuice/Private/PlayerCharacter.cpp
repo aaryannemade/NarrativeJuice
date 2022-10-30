@@ -35,6 +35,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	SetCharacterRotation();
 
 	SetMovementStartDirection();
+
+	DodgeRoll();
 	
 	SetHadMovementInputLastFrame(MovementInput);
 
@@ -58,7 +60,17 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("GamepadPitch", this, &APlayerCharacter::GamepadPitch);
 	PlayerInputComponent->BindAxis("GamepadYaw", this, &APlayerCharacter::GamepadYaw);
 
+	PlayerInputComponent->BindAction("DodgeRoll", EInputEvent::IE_Pressed, this, &APlayerCharacter::Dodge);
+
 }
+
+void APlayerCharacter::Dodge()
+{
+	IsDodging = true;
+	//SetActorRotation(DesiredMovementRotation);
+	SetMovementRotationMode(E_MovementRotationMode::RootMotionRotation);
+}
+
 
 void APlayerCharacter::MoveForward(float value)
 {
@@ -223,7 +235,7 @@ void APlayerCharacter::SetCharacterRotation()
 		break;
 		
 	case E_MovementRotationMode::RootMotionRotation:
-		if(MovementInput)
+		if(MovementInput && !IsDodging)
 		{
 			TargetAnimationRotation = AnimationTargetRotation - AnimationTargetRotationLastFrame;
 			AddActorWorldRotation(FRotator(0, TargetAnimationRotation, 0), false, nullptr, ETeleportType::None);
@@ -301,6 +313,28 @@ void APlayerCharacter::AutoRun()
 	else
 	{
 		JogTimer += DeltaX;
+	}
+}
+
+void APlayerCharacter::DodgeRoll()
+{
+	if(IsDodging)
+	{
+		DodgeTimer += DeltaX;
+		if(DodgeTimer < 0.44f)
+		{
+			GetCharacterMovement()->Velocity = GetActorForwardVector() * MovementSettings.DodgeForce;
+		}
+		else if(DodgeTimer < 0.8f)
+		{
+			SetMovementRotationMode(E_MovementRotationMode::RootMotionRotation);
+		}
+		else
+		{
+			SetMovementRotationMode(E_MovementRotationMode::MovementInputRotation);
+			IsDodging = false;
+			DodgeTimer = 0.f;
+		}
 	}
 }
 
