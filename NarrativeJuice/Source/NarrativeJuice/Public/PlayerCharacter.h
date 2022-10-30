@@ -11,7 +11,33 @@ UENUM(BlueprintType)
 enum E_MovementRotationMode
 {
 	RootMotionRotation	UMETA(DisplayName = "Animation Root Motion"),
-	MovementInputRotation	UMETA(DisplayName = "Movement Input"),
+	MovementInputRotation	UMETA(DisplayName = "Movement Input")
+};
+
+UENUM(BlueprintType)
+enum E_MovementSpeed
+{
+	Walk	UMETA(DisplayerName = "Walk"),
+	Jog		UMETA(DisplayName = "Jog"),
+	Run		UMETA(DisplayName = "Run")
+};
+
+USTRUCT(BlueprintType)
+struct FMovementSettings
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkSpeed = 165.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JogSpeed = 345.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RunSpeed = 695.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AutoRunTime = 1.2f;
 };
 
 UCLASS()
@@ -22,6 +48,9 @@ class NARRATIVEJUICE_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FMovementSettings MovementSettings = FMovementSettings();
 
 	float DeltaX = 0.f;
 
@@ -36,6 +65,12 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float ControllerSensitivity = 45.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AnimationTargetRotation = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float AnimationTargetRotationLastFrame = 0.f;
 
 	void MoveForward(float value);
 
@@ -64,6 +99,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TEnumAsByte<E_MovementRotationMode> MovementRotationMode = E_MovementRotationMode::RootMotionRotation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<E_MovementSpeed> MovementSpeed = E_MovementSpeed::Jog;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float JogTimer = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float LeanDirection = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LeanThreshold = 45.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LeanSpeed = 6.f;
+	
 	FRotator GetControlRotationYaw();
 
 	void SetDesiredMovementRotation(float InputX, float InputY, FRotator ControlRotation);
@@ -79,9 +129,25 @@ public:
 
 	float CalculateMovementStartDirection(float InputX, float InputY, FRotator WorldRotation, FRotator ControlRotation);
 
+	UFUNCTION(BlueprintCallable)
 	void SetMovementRotationMode(E_MovementRotationMode RotationMode);
 
 	void SetCharacterRotation();
+
+	void AddCharacterStoppingMovement();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCharacterMaxWalkSpeed();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCharacterMovementSpeed(float MoveSpeed);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateAnimationTargetRotation(float rotation);
+
+	void SetLeanDirection();
+
+	void AutoRun();
 	
 protected:
 	// Called when the game starts or when spawned

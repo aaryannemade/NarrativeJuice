@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -39,7 +40,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	
 
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Desired Movement Rotation: ") + DesiredMovementRotation.ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, FString::Printf(TEXT("Desired Animation Rotation: %f"), AnimationTargetRotation-AnimationTargetRotationLastFrame));
 
 }
 
@@ -125,12 +126,30 @@ void APlayerCharacter::SetMovementInput(float InputX, float InputY)
 	if(FMath::Abs(InputX) != 0.f || FMath::Abs(InputY) != 0.f)
 	{
 		MovementInput = true;
+
+		SetLeanDirection();
+
+		if(MovementSpeed == E_MovementSpeed::Jog)
+		{
+			AutoRun();
+		}
 	}
 	else
 	{
 		MovementInput = false;
 
 		SetMovementRotationMode(E_MovementRotationMode::RootMotionRotation);
+
+		AnimationTargetRotationLastFrame = 0.f;
+
+		AddCharacterStoppingMovement();
+
+		if(JogTimer >0.f)
+		{
+			JogTimer = 0.f;
+		}
+
+		
 	}
 }
 
@@ -144,7 +163,12 @@ bool APlayerCharacter::StartedMovement()
 	if(MovementInput && !HadMovementInputLastFrame)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StartedMoving"));
-
+		
+		if(MovementSpeed == E_MovementSpeed::Run)
+		{
+			MovementSpeed = E_MovementSpeed::Jog;
+			UpdateCharacterMaxWalkSpeed();
+		}
 		return true;
 	}
 	else
@@ -152,6 +176,8 @@ bool APlayerCharacter::StartedMovement()
 		return false;
 	}
 }
+
+
 
 void APlayerCharacter::SetMovementStartDirection()
 {
@@ -185,12 +211,100 @@ void APlayerCharacter::SetMovementRotationMode(E_MovementRotationMode RotationMo
 
 void APlayerCharacter::SetCharacterRotation()
 {
-	if(MovementInput && MovementRotationMode == E_MovementRotationMode::MovementInputRotation)
+	FRotator TargetRotation = FRotator::ZeroRotator;
+	float TargetAnimationRotation = 0.f;
+	switch (MovementRotationMode)
 	{
-		FRotator TargetRotation = FMath::Lerp(GetActorRotation(), DesiredMovementRotation, MovementRotationSpeed * DeltaX);
+	case E_MovementRotationMode::MovementInputRotation:
+		//FRotator TargetRotation = FRotator::ZeroRotator;
+		TargetRotation = FMath::Lerp(GetActorRotation(), DesiredMovementRotation, MovementRotationSpeed * DeltaX);
 		SetActorRotation(TargetRotation, ETeleportType::None);
+		GEngine->AddOnScreenDebugMessage(-2, DeltaX, FColor::Red, TEXT("Using Movement Input Rotation"));
+		break;
+		
+	case E_MovementRotationMode::RootMotionRotation:
+		if(MovementInput)
+		{
+			TargetAnimationRotation = AnimationTargetRotation - AnimationTargetRotationLastFrame;
+			AddActorWorldRotation(FRotator(0, TargetAnimationRotation, 0), false, nullptr, ETeleportType::None);
+			AnimationTargetRotationLastFrame = AnimationTargetRotation;
+		}
+		
+		GEngine->AddOnScreenDebugMessage(-2, DeltaX, FColor::Red, TEXT("Using Animation Curve Rotation"));
+		break;
+		
+	default:
+		break;
 	}
 }
+
+void APlayerCharacter::AddCharacterStoppingMovement()
+{
+	AddMovementInput(GetActorForwardVector(), 1.f);
+}
+
+void APlayerCharacter::UpdateCharacterMaxWalkSpeed()
+{
+	switch(MovementSpeed)
+	{
+	case E_MovementSpeed::Walk:
+		GetCharacterMovement()->MaxWalkSpeed = MovementSettings.WalkSpeed;
+		break;
+	case E_MovementSpeed::Jog:
+		GetCharacterMovement()->MaxWalkSpeed = MovementSettings.JogSpeed;
+		break;
+	case E_MovementSpeed::Run:
+		GetCharacterMovement()->MaxWalkSpeed = MovementSettings.RunSpeed;
+		break;
+	default:
+		break;
+	}
+}
+
+void APlayerCharacter::UpdateCharacterMovementSpeed(float MoveSpeed)
+{
+	switch (MovementRotationMode)
+	{
+	case E_MovementRotationMode::MovementInputRotation:
+		UpdateCharacterMaxWalkSpeed();
+		break;
+	case E_MovementRotationMode::RootMotionRotation:
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+		break;
+	default:
+		break;
+	}
+}
+
+
+void APlayerCharacter::UpdateAnimationTargetRotation(float rotation)
+{
+	AnimationTargetRotation = rotation;
+}
+
+void APlayerCharacter::SetLeanDirection()
+{
+	float DeltaYaw = ((DesiredMovementRotation - GetActorRotation()).GetNormalized()).Yaw;
+	float LeanRaw = FMath::GetMappedRangeValueClamped(FVector2d(-LeanThreshold, LeanThreshold), FVector2d(-1, 1), DeltaYaw);
+
+	LeanDirection = FMath::Lerp(LeanDirection, LeanRaw, LeanSpeed * DeltaX);
+}
+
+void APlayerCharacter::AutoRun()
+{
+	if(JogTimer > MovementSettings.AutoRunTime)
+	{
+		MovementSpeed = E_MovementSpeed::Run;
+		UpdateCharacterMaxWalkSpeed();
+		JogTimer = 0.f;
+	}
+	else
+	{
+		JogTimer += DeltaX;
+	}
+}
+
+
 
 
 
