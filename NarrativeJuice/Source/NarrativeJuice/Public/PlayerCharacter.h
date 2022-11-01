@@ -37,7 +37,7 @@ struct FMovementSettings
 	float RunSpeed = 695.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AutoRunTime = 1.2f;
+	float AutoRunTime = 4.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DodgeForce = 1560.f;
