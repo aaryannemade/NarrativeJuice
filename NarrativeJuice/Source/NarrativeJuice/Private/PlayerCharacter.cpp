@@ -281,7 +281,14 @@ void APlayerCharacter::UpdateCharacterMovementSpeed(float MoveSpeed)
 		UpdateCharacterMaxWalkSpeed();
 		break;
 	case E_MovementRotationMode::RootMotionRotation:
-		GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+		if(MoveSpeed < 25.f)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+		}
 		break;
 	default:
 		break;

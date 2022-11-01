@@ -37,7 +37,7 @@ struct FMovementSettings
 	float RunSpeed = 695.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AutoRunTime = 4.f;
+	float AutoRunTime = 1.2f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DodgeForce = 1560.f;
@@ -122,7 +122,7 @@ public:
 	float LeanThreshold = 45.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeanSpeed = 6.f;
+	float LeanSpeed = 3.f;
 	
 	FRotator GetControlRotationYaw();
 
